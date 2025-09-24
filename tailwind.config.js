@@ -11,8 +11,8 @@ export default {
     extend: {
       colors: {
         primary_white: {
-          DEFAULT: "#dddddd",       // main
-          foreground: "#dddddd",    // text color on primary
+          DEFAULT: "#dddddd",
+          foreground: "#dddddd",
         },
         secondary: {
           DEFAULT: "#64748b",
@@ -23,6 +23,14 @@ export default {
           foreground: "#64748b",
         },
       },
+      'sky-primary': '#3B82F6',
+        'sky-secondary': '#DBEAFE', 
+        'cloud-white': '#FFFFFF',
+        'horizon': '#F8FAFC',
+        'text-foreground': {
+          light: 'hsl(215 20% 15%)',
+          dark: 'hsl(210 40% 98%)',
+        },
     },
   },
   plugins: [],
