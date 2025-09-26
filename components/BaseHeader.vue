@@ -1,5 +1,15 @@
 <script setup lang="ts">
 
+const emit = defineEmits(['logUser']);
+
+const handleLogin = (formData : any) => {
+  // TODO: implement
+}
+
+const handleRegister = (formData : any) => {
+  // TODO: implement
+}
+
 </script>
 
 <template>
@@ -13,11 +23,7 @@
 
       <!-- Right side Links -->
       <div class="hidden md:flex items-center space-x-6">
-        <button
-          class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-white text-black"
-        >
-          Sign In
-        </button>
+        <LoginMenu  @login="handleLogin" @register="handleRegister"/>
       </div>
     </nav>
   </header>

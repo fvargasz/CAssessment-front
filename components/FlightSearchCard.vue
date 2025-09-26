@@ -1,5 +1,19 @@
  <script setup lang="ts">
 import { ref } from 'vue'
+import type { Flight } from '~/types/flight';
+
+const flights : [Flight] = [
+    {
+      airline: "AC",
+      number: 301,
+      name: "Air Canada",
+      departure_airport: "YUL",
+      departure_time: "07:35",
+      arrival_airport: "YVR",
+      arrival_time: "10:05",
+      price: 273.23
+    }
+  ]
 
 const tripType = ref<'one-way' | 'round-trip'>('round-trip')
 
@@ -16,7 +30,10 @@ const searchData = ref({
   passengers: 1
 })
 
-function handleSearch() {
+const getTripType = (): string =>
+  tripItems.find(trip => trip.value === tripType.value)?.label || ""
+
+async function handleSearch() {
     // TODO: Implement search logic
 }
 
@@ -126,6 +143,20 @@ function handleSearch() {
           </Button>
         </div>
       </div>
+    </div>
+  </div>
+  
+  <!-- Display the flights found -->
+  <div v-if="flights && flights.length > 0" class="p-4 mt-4
+    bg-white/60
+    backdrop-blur-sm rounded-md
+    pr-8">
+    <div class="flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-foreground">{{ flights.length }} flight found</h2>
+      <p>{{getTripType()}}</p>
+    </div>
+    <div v-for="flight in flights" class="flex flex-col">
+      <FlightInfoCard :flight="flight" :trip-type="tripType"/>
     </div>
   </div>
 </template>
