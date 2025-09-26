@@ -72,12 +72,13 @@ export const useAuth = () => {
     delete axios.defaults.headers.common['Authorization']
     const token = useCookie('auth-token')
     token.value = null
+    window.location.reload()
   }
 
   const register = async (userInfo) => {
         try {
             const config = useRuntimeConfig()
-        const { data } = await axios.post(config.public.API_BASE_URL+ "/users/register", userInfo);
+        const { data } = await axios.post(config.public.API_BASE_URL+ "/users/create", userInfo);
         user.value = data.user;
 
         if (data.token) {

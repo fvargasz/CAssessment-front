@@ -1,5 +1,14 @@
 <template>
   <div class="w-full max-w-6xl mx-auto space-y-8" v-if="airports && airports.length > 0">
+
+    <!-- Display message to user -->
+    <div v-if="transactionAdded" class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+      <span class="font-medium">Success!</span> Your trip has been added successfully.
+    </div>
+    <div v-if="errorMessage" class="p-4 my-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+      <span class="font-medium">{{ errorMessage }}</span>
+    </div>
+
     <div class="p-8 
     rounded-md
     bg-[linear-gradient(145deg,hsl(0_0%_100%/.9),hsl(0_0%_100%/.7))]
@@ -135,8 +144,13 @@
     </div>
   </div>
   
-  <!-- Display the flights found -->
-  <div v-if="showTrips" class="w-full max-w-6xl mx-auto mt-8">
+  <!-- Check if user is logged in -->
+  <div v-if="userTriedToBook && !isLoggedIn" class="p-4 my-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+      <span class="font-medium">Please log in or create an account to book a trip.</span>
+  </div>
+
+  <!-- Display flight options -->
+  <div v-if="showTrips" class="w-full max-w-6xl mx-auto mt-4">
     <div v-if="flights && flights.length > 0" class="p-4 mt-4
       bg-white/60
       backdrop-blur-sm rounded-md
@@ -181,6 +195,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useAuth } from '~/composables/useAuth';
 import { fetchAirports } from '~/services/airports';
 import { fetchFlights } from '~/services/flight';
 import { createTrip } from '~/services/trips';
@@ -194,6 +209,10 @@ const departureAirport = ref();
 const arrivalAirport = ref();
 const airports = ref<Airport[]>([]);
 const showTrips = ref(false);
+const transactionAdded = ref(false);
+const { user, isLoggedIn } = useAuth();
+const userTriedToBook = ref(false);
+const errorMessage = ref('');
 
 const tripType = ref<'one_way' | 'round_trip'>('round_trip')
 
@@ -233,6 +252,7 @@ async function handleSearch()  {
 
   flights.value = [];
   tripOptions.value = [];
+  transactionAdded.value = false;
 
   const body = {
     departure_airport_id: departureAirport.value?.id,
@@ -254,9 +274,8 @@ async function handleSearch()  {
     }
     showTrips.value = true;
   } catch (error) {
-    
+    errorMessage.value = 'Error fetching flights. Please try again.';
   }
-
 }
 
 const handleDepartureChange = () => {
@@ -295,9 +314,18 @@ function setTripType(type: 'one_way' | 'round_trip') {
   tripType.value = type;
   flights.value = [];
   tripOptions.value = [];
+  userTriedToBook.value = false;
+  showTrips.value = false;
+  searchData.returnDate = '';
+  errorMessage.value = '';
 }
 
 const onSelectPressed = async (trip: any) => {
+
+  if (!isLoggedIn.value) {
+    userTriedToBook.value = true;
+    return;
+  }
 
   var body: any = {};
   const formatDate = (date: any) => {
@@ -356,11 +384,24 @@ const onSelectPressed = async (trip: any) => {
   }
 
   try {
-    console.log('Request body:', body); 
     const result = await createTrip(body);
-    console.log('Trip created successfully:', result);
+    clearFields();
   } catch (error) {
+    errorMessage.value = 'Error fetching flights. Please try agaddfain.';
     console.error('Error creating trip:', error);
+  }
+
+  function clearFields() {
+    transactionAdded.value = true;
+    flights.value = [];
+    tripOptions.value = [];
+    errorMessage.value = '';
+    showTrips.value = false;
+    searchData.from = '';
+    searchData.to = '';
+    searchData.departDate = '';
+    searchData.returnDate = '';
+    searchData.passengers = 1;
   }
 }
 </script>

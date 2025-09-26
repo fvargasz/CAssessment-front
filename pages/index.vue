@@ -44,7 +44,7 @@
               </button>
             </div>
           </div>
-          <div class="pt-6 flex flex-col items-center gap-4">
+          <div v-if="isLoggedIn" class="pt-6 flex flex-col items-center gap-4">
             <h2 class="text-xl md:text-2xl font-semibold text-cloud-white">
               Want to check your trips?
             </h2>
