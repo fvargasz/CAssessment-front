@@ -1,71 +1,3 @@
-<script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
-
-const emit = defineEmits(['login', 'register'])
-
-const isOpen = ref(false)
-const activeTab = ref('login')
-const errorMessage = ref('');
-
-const loginForm = reactive({
-  email: '',
-  password: ''
-})
-
-const registerForm = reactive({
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: ''
-})
-
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value
-}
-
-const handleBlur = (event) => {
-  setTimeout(() => {
-    if (!event.relatedTarget || !event.relatedTarget.closest('.relative')) {
-      isOpen.value = false
-    }
-  }, 100)
-}
-
-const closeDropdown = () => {
-  isOpen.value = false
-}
-
-const handleLogin = () => {
-  console.log('Login attempt:', loginForm)
-  emit('login', { ...loginForm })
-  closeDropdown()
-}
-
-const handleRegister = () => {
-  if (registerForm.password !== registerForm.confirmPassword) {
-    alert('Passwords do not match!')
-    return
-  }
-  console.log('Register attempt:', registerForm)
-  emit('register', { ...registerForm })
-  closeDropdown()
-}
-
-const handleClickOutside = (event) => {
-  if (!event.target.closest('.relative')) {
-    isOpen.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
-</script>
-
 <template>
     <div class="relative inline-block">
     <!-- Dropdown Trigger Button -->
@@ -100,7 +32,7 @@ onUnmounted(() => {
           <!-- Tab List -->
           <div class="grid grid-cols-2 rounded-t-md rounded-b-none bg-gray-100/50">
             <button
-              @click="activeTab = 'login'"
+              @click="onSwitchTab('login')"
               :class="[
                 'flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium rounded-tl-md transition-colors duration-200',
                 activeTab === 'login'
@@ -114,7 +46,7 @@ onUnmounted(() => {
               Login
             </button>
             <button
-              @click="activeTab = 'register'"
+              @click="onSwitchTab('register')"
               :class="[
                 'flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium rounded-tr-md transition-colors duration-200',
                 activeTab === 'register'
@@ -142,7 +74,7 @@ onUnmounted(() => {
                 v-model="loginForm.email"
                 type="email"
                 placeholder="Enter your email"
-                class="w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="text-black w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div class="space-y-2">
@@ -152,7 +84,7 @@ onUnmounted(() => {
                 v-model="loginForm.password"
                 type="password"
                 placeholder="Enter your password"
-                class="w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="text-black w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <button
@@ -172,7 +104,7 @@ onUnmounted(() => {
                 v-model="registerForm.name"
                 type="text"
                 placeholder="Enter your full name"
-                class="w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="text-black w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div class="space-y-2">
@@ -182,7 +114,7 @@ onUnmounted(() => {
                 v-model="registerForm.email"
                 type="email"
                 placeholder="Enter your email"
-                class="w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="text-black w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div class="space-y-2">
@@ -192,7 +124,7 @@ onUnmounted(() => {
                 v-model="registerForm.password"
                 type="password"
                 placeholder="Create a password"
-                class="w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="text-black w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div class="space-y-2">
@@ -202,7 +134,7 @@ onUnmounted(() => {
                 v-model="registerForm.confirmPassword"
                 type="password"
                 placeholder="Confirm your password"
-                class="w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="text-black w-full px-3 py-2 bg-gray-50/50 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <button
@@ -217,3 +149,97 @@ onUnmounted(() => {
     </Transition>
   </div>
 </template>
+
+<script setup>
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+
+
+const { user, isLoggedIn, login, logout, register } = useAuth();
+
+const isOpen = ref(false)
+const activeTab = ref('login')
+const errorMessage = ref('');
+
+const loginForm = reactive({
+  email: '',
+  password: ''
+})
+
+const registerForm = reactive({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+})
+
+const toggleDropdown = () => {
+  isOpen.value = !isOpen.value
+}
+
+const handleBlur = (event) => {
+  setTimeout(() => {
+    if (!event.relatedTarget || !event.relatedTarget.closest('.relative')) {
+      isOpen.value = false
+    }
+  }, 100)
+}
+
+const closeDropdown = () => {
+  isOpen.value = false
+}
+
+const handleLogin = async () => {
+    try {
+        const body = {
+            email: loginForm.email,
+            password: loginForm.password
+        };
+        const result = await login(body);
+        
+        closeDropdown()
+    } catch (error) {
+        errorMessage.value = error.response.data.error || 'Login failed. Please try again.'
+    }
+}
+
+const handleRegister = async () => {
+  if (registerForm.password !== registerForm.confirmPassword) {
+    errorMessage.value = 'Passwords do not match!';
+    return
+  }
+  try {
+    const body = {
+      name: registerForm.name,
+      email: registerForm.email,
+      password: registerForm.password
+    };
+
+    await register(body);
+    
+    closeDropdown()
+  } catch (error) {
+    errorMessage.value = error.response.data.error || 'Register failed. Please try again.'
+  }
+}
+
+// Close dropdown when clicking outside
+const handleClickOutside = (event) => {
+  if (!event.target.closest('.relative')) {
+    isOpen.value = false
+  }
+}
+
+const onSwitchTab = (tab) => {
+  activeTab.value = tab;
+  errorMessage.value = '';
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+</script>
