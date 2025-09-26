@@ -13,7 +13,7 @@
                 </div>
                 <div class="items-center text-left">
                     <p class="font-semibold ">{{outBoundFlight.airline.name}}</p>
-                    <p class="text-gray-500">Flight {{outBoundFlight.airline.code }} {{outBoundFlight.number }}</p>
+                    <p class="text-gray-500">Flight {{outBoundFlight.airline.code }} {{outBoundFlight.number }}{{ outboundDate ? " ---- " + outboundDate : '' }}</p>
                 </div>
             </div>
             <div class="flex items-center flex-row space-x-4">
@@ -50,7 +50,7 @@
                 </div>
                 <div class="items-center text-left">
                     <p class="font-semibold ">{{returnFlight.airline.name}}</p>
-                    <p class="text-gray-500">Flight {{returnFlight.airline.code }} {{returnFlight.number }}</p>
+                    <p class="text-gray-500">Flight {{returnFlight.airline.code }} {{returnFlight.number }}{{ returnDate ? " ---- " + returnDate : '' }}</p>
                 </div>
             </div>
             <div class="flex items-center flex-row space-x-4">
@@ -109,6 +109,8 @@ const props = withDefaults(defineProps<{
     returnFlight?: Flight,
     tripType: string,
     ownedFlight: boolean,
+    outboundDate?: string,
+    returnDate?: string,
     onClick?: (data: Flight | any) => Promise<void>,
 }>(), {
     ownedFlight: false,

@@ -67,6 +67,8 @@
                   :trip-type="trip.trip_type"
                   :returnFlight="trip.trip_type === 'round_trip' ? trip.segments[1]!.flight : undefined"
                   :owned-flight="true"
+                  :outboundDate="formatDate(trip.segments[0]!.flight_date)"
+                  :returnDate="trip.trip_type === 'round_trip' ? formatDate(trip.segments[1]!.flight_date) : undefined"
                 />
               </div>
           </div>
@@ -100,5 +102,11 @@ import type { Trip } from '~/types/trip';
     } catch (error) {
       console.error('Error fetching trips:', error);
     }
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString("en-GB")
+    .replace(/\//g, "-")        
 }
 </script>

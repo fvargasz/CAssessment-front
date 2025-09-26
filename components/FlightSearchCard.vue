@@ -387,8 +387,7 @@ const onSelectPressed = async (trip: any) => {
     const result = await createTrip(body);
     clearFields();
   } catch (error) {
-    errorMessage.value = 'Error fetching flights. Please try agaddfain.';
-    console.error('Error creating trip:', error);
+    errorMessage.value = 'Error processing trip.';
   }
 
   function clearFields() {
