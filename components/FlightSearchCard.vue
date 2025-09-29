@@ -109,7 +109,7 @@
           </div>
 
             <!-- Return Date -->
-            <div v-if="tripType === 'round-trip'" class="space-y-2">
+            <div v-if="tripType === 'round_trip'" class="space-y-2">
                 <Label for="return" class="text-sm font-medium text-foreground">Return</Label>
                 <div class="relative">
                     <Icon
@@ -191,6 +191,11 @@
       <h2 class="text-2xl font-bold text-foreground">No flights found. Please try different search criteria.</h2>
     </div>
   </div>
+  <div v-if="areFlightsInProgress || isDataLoading" class="w-full flex justify-center items-center h-64">
+    <LoadingSpinner />
+  </div>
+
+  <LoadingOverlay v-if="isTransactionInProgress"/>
 </template>
 
 <script setup lang="ts">
@@ -213,6 +218,9 @@ const transactionAdded = ref(false);
 const { user, isLoggedIn } = useAuth();
 const userTriedToBook = ref(false);
 const errorMessage = ref('');
+const isDataLoading = ref(true);
+const areFlightsInProgress = ref(false);
+const isTransactionInProgress = ref(false);
 
 const tripType = ref<'one_way' | 'round_trip'>('round_trip')
 
@@ -249,7 +257,7 @@ const searchData = reactive({
 })
 
 async function handleSearch()  {
-
+  areFlightsInProgress.value = true
   flights.value = [];
   tripOptions.value = [];
   transactionAdded.value = false;
@@ -275,6 +283,9 @@ async function handleSearch()  {
     showTrips.value = true;
   } catch (error : any) {
     errorMessage.value = error.response.data.error;
+    scrollToTop();
+  } finally {
+    areFlightsInProgress.value = false
   }
 }
 
@@ -306,6 +317,7 @@ function onReturnDateChange(event : any) {
 
 onMounted(async () => {
   airports.value = await fetchAirports();
+  isDataLoading.value = false
 });
 
 function setTripType(type: 'one_way' | 'round_trip') {
@@ -320,6 +332,7 @@ function setTripType(type: 'one_way' | 'round_trip') {
 
 const onSelectPressed = async (trip: any) => {
 
+  isTransactionInProgress.value = true;
   if (!isLoggedIn.value) {
     userTriedToBook.value = true;
     return;
@@ -386,6 +399,9 @@ const onSelectPressed = async (trip: any) => {
     clearFields();
   } catch (error) {
     errorMessage.value = 'Error processing trip.';
+    scrollToTop();
+  } finally {
+    isTransactionInProgress.value = false;
   }
 
   function clearFields() {
@@ -400,5 +416,12 @@ const onSelectPressed = async (trip: any) => {
     searchData.returnDate = '';
     searchData.passengers = 1;
   }
+}
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
 }
 </script>

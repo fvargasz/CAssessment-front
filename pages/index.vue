@@ -27,10 +27,9 @@
               <span class="text-cloud-white font-medium">Best Prices</span>
             </div>
           </div>
-
+          
           <div class="pt-8" v-if="!hasConnectionError">
             <FlightSearchCard v-if="isInitialized && !hasConnectionError" />
-            
           </div>
           <div v-else>
               <div class="flex justify-center flex-col items-center">
@@ -85,6 +84,7 @@ import axios from 'axios';
 import type { Trip } from '~/types/trip';
 
   const { user, isLoggedIn, isInitialized, loading, hasConnectionError, initializeAuth, retryConnection } = useAuth();
+  const isDataFetch = ref(false);
 
   const authPromise = initializeAuth();
 
@@ -94,14 +94,17 @@ import type { Trip } from '~/types/trip';
   async function handleSearch()  {
     showTrips.value = true;
     try {
-     const config = useRuntimeConfig();
-    const response = await axios.post(
+      const config = useRuntimeConfig();
+      const response = await axios.post(
         config.public.API_BASE_URL+"/trip/getActiveUserTrips" );
 
         trips.value = response.data.data as Trip[];
+        isDataFetch.value=true;
+
     } catch (error) {
       console.error('Error fetching trips:', error);
-    }
+      isDataFetch.value=true;
+    } 
 }
 
 function formatDate(dateStr: string): string {
