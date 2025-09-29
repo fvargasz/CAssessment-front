@@ -86,6 +86,7 @@
 <script setup lang="ts">
 import axios from 'axios';
 import type { Trip } from '~/types/trip';
+import { getActiveUserTrips } from '~/services/trips';
 
   const { user, isLoggedIn, isInitialized, loading, hasConnectionError, initializeAuth, retryConnection } = useAuth();
   const isDataFetch = ref(false);
@@ -100,11 +101,8 @@ import type { Trip } from '~/types/trip';
     showTrips.value = true;
     isLoadingTrips.value = true;
     try {
-      const config = useRuntimeConfig();
-      const response = await axios.post(
-        config.public.API_BASE_URL+"/trip/getActiveUserTrips" );
 
-        trips.value = response.data.trips as Trip[];
+        trips.value = await getActiveUserTrips();
 
     } catch (error) {
       console.error('Error fetching trips:', error);

@@ -218,6 +218,7 @@ const handleRegister = async () => {
     
     closeDropdown()
   } catch (error) {
+    console.log(error);
     errorMessage.value = error.response.data.error || 'Register failed. Please try again.'
   }
 }
