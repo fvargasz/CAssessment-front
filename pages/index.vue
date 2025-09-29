@@ -56,7 +56,10 @@
               Show
             </Button>
             <div v-if="showTrips" class="w-full mt-6">
-              <div v-if="trips.length === 0" class="text-xl md:text-2xl font-semibold text-black">
+              <div v-if="isLoadingTrips" class="w-full flex justify-center items-center h-64">
+                <LoadingSpinner/>
+              </div>
+              <div v-else-if="trips.length === 0" class="text-xl md:text-2xl font-semibold text-black">
                 <p>No trips found.</p>
               </div>
               <div v-for="trip in trips" :key="trip.id">
@@ -91,22 +94,25 @@ import type { Trip } from '~/types/trip';
 
   const trips = ref<Trip[]>([]);
   const showTrips = ref(false);
+  const isLoadingTrips = ref(false);
 
   async function handleSearch()  {
     showTrips.value = true;
+    isLoadingTrips.value = true;
     try {
       const config = useRuntimeConfig();
       const response = await axios.post(
         config.public.API_BASE_URL+"/trip/getActiveUserTrips" );
 
         trips.value = response.data.trips as Trip[];
-        
-        isDataFetch.value=true;
 
     } catch (error) {
       console.error('Error fetching trips:', error);
+      
+    } finally {
       isDataFetch.value=true;
-    } 
+      isLoadingTrips.value=false;
+    }
 }
 
 function formatDate(dateStr: string): string {
