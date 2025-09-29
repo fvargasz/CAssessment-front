@@ -61,10 +61,11 @@
               </div>
               <div v-for="trip in trips" :key="trip.id">
                 <FlightInfoCard  
+                  v-if="trip.segments?.[0]?.flight"
                   :trip="trip"
-                  :outBoundFlight="trip.segments[0]!.flight" 
+                  :outBoundFlight="trip.segments[0].flight" 
                   :trip-type="trip.trip_type"
-                  :returnFlight="trip.trip_type === 'round_trip' ? trip.segments[1]!.flight : undefined"
+                  :returnFlight="trip.trip_type === 'round_trip' ? trip.segments[1]?.flight : undefined"
                   :owned-flight="true"
                   :outboundDate="formatDate(trip.segments[0]!.flight_date)"
                   :returnDate="trip.trip_type === 'round_trip' ? formatDate(trip.segments[1]!.flight_date) : undefined"
@@ -98,7 +99,8 @@ import type { Trip } from '~/types/trip';
       const response = await axios.post(
         config.public.API_BASE_URL+"/trip/getActiveUserTrips" );
 
-        trips.value = response.data.data as Trip[];
+        trips.value = response.data.trips as Trip[];
+        
         isDataFetch.value=true;
 
     } catch (error) {

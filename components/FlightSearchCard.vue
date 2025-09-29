@@ -128,6 +128,46 @@
             </div>
         </div>
 
+        <!-- Airline filter -->
+        <div class="grid grid-cols-1 md:grid-cols-4">
+          <div>
+            <input 
+              id="agree" 
+              v-model="filterAirlines" 
+              type="checkbox"
+              class="mr-2"
+            >
+            <label for="agree">Filter by airline</label>
+          </div>
+          <div v-if="filterAirlines">
+            <div class="relative">
+                <Icon
+                name="material-symbols:airplane-ticket"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-sky-primary pointer-events-none z-10"
+              />
+              <select
+                id="to"
+                v-model="searchData.preferedAirline"
+                @change="handleAirlineSelection"
+                class="w-full pl-10 pr-8 py-2 rounded border border-sky-primary/30 text-sm bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-sky-primary/20 focus:border-sky-primary"
+              >
+                <option
+                  v-for="airline in airlines"
+                  :key="airline.id"
+                  :value="airline.id"
+                >
+                  {{ airline.name }}
+                </option>
+              </select>
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg class="h-4 w-4 text-sky-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Search Button -->
         <div class="flex justify-center pt-4">
           <Button size="lg" @click="handleSearch" 
@@ -156,7 +196,7 @@
       backdrop-blur-sm rounded-md
       pr-8">
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-foreground">{{ flights.length }} flight found</h2>
+        <h2 class="text-2xl font-bold text-foreground">{{ flights.length }} {{ flights.length > 1 ? 'flights' : 'flight'}} found</h2>
         <p>{{getTripType()}}</p>
       </div>
       <div v-for="flight in flights" class="flex flex-col">
@@ -169,7 +209,7 @@
       backdrop-blur-sm rounded-md
       pr-8">
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-foreground">{{ tripOptions.length }} flight found</h2>
+        <h2 class="text-2xl font-bold text-foreground">{{ tripOptions.length }} {{ tripOptions.length > 1 ? 'trips' : 'trip'}} found</h2>
         <p>{{getTripType()}}</p>
       </div>
       
@@ -182,15 +222,17 @@
         :owned-flight="false"/>
       </div>
     </div>
-  </div>
-  <div v-else-if="showTrips && flights.length === 0 && tripOptions.length === 0" class="w-full max-w-6xl mx-auto mt-8">
-    <div class="p-4 mt-4
-      bg-white/60
-      backdrop-blur-sm rounded-md
-      pr-8">
-      <h2 class="text-2xl font-bold text-foreground">No flights found. Please try different search criteria.</h2>
+
+    <div v-else class="w-full max-w-6xl mx-auto mt-8">
+      <div class="p-4 mt-4
+        bg-white/60
+        backdrop-blur-sm rounded-md
+        pr-8">
+        <h2 class="text-2xl font-bold text-foreground">No flights found. Please try different search criteria.</h2>
+      </div>
     </div>
   </div>
+  
   <div v-if="areFlightsInProgress || isDataLoading" class="w-full flex justify-center items-center h-64">
     <LoadingSpinner />
   </div>
@@ -201,18 +243,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAuth } from '~/composables/useAuth';
+import { fetchAirlines } from '~/services/airline';
 import { fetchAirports } from '~/services/airports';
 import { fetchFlights } from '~/services/flight';
 import { createTrip } from '~/services/trips';
+import type { Airline } from '~/types/airline';
 import type { Airport } from '~/types/airport';
 import type { Flight } from '~/types/flight';
 import type { TripOption } from '~/types/tripOption';
 
-const flights = ref<Flight[]>([]);
-const tripOptions = ref<TripOption[]>([]);
+
 const departureAirport = ref();
 const arrivalAirport = ref();
-const airports = ref<Airport[]>([]);
 const showTrips = ref(false);
 const transactionAdded = ref(false);
 const { user, isLoggedIn } = useAuth();
@@ -221,6 +263,14 @@ const errorMessage = ref('');
 const isDataLoading = ref(true);
 const areFlightsInProgress = ref(false);
 const isTransactionInProgress = ref(false);
+const filterAirlines = ref(false);
+const preferedAirline = ref();
+
+// Back dependent variables
+const flights = ref<Flight[]>([]);
+const tripOptions = ref<TripOption[]>([]);
+const airports = ref<Airport[]>([]);
+const airlines = ref<Airline[]>([]);
 
 const tripType = ref<'one_way' | 'round_trip'>('round_trip')
 
@@ -253,7 +303,8 @@ const searchData = reactive({
   to: '',
   departDate: '',
   returnDate: '',
-  passengers: 1
+  passengers: 1,
+  preferedAirline: undefined
 })
 
 async function handleSearch()  {
@@ -261,6 +312,7 @@ async function handleSearch()  {
   flights.value = [];
   tripOptions.value = [];
   transactionAdded.value = false;
+  showTrips.value = false;
 
   const body = {
     departure_airport_id: departureAirport.value?.id,
@@ -268,6 +320,7 @@ async function handleSearch()  {
     tripType: tripType.value,
     departDate: searchData.departDate,
     returnDate: tripType.value === 'round_trip' ? searchData.returnDate : null,
+    airline_id: filterAirlines.value ? preferedAirline.value : undefined,
   }
 
   try {
@@ -307,6 +360,15 @@ const handleArrivalChange = () => {
   }
 };
 
+const handleAirlineSelection = () => {
+  if (searchData.preferedAirline) {
+    const selectedAirline = airlines.value.find(airline => airline.id === airline.id);
+    if (selectedAirline) {
+      preferedAirline.value = selectedAirline.id;
+    }
+  }
+}
+
 function onDepartDateChange(event : any) {
   searchData.departDate = event.target.value
 }
@@ -317,6 +379,7 @@ function onReturnDateChange(event : any) {
 
 onMounted(async () => {
   airports.value = await fetchAirports();
+  airlines.value = await fetchAirlines();
   isDataLoading.value = false
 });
 
@@ -397,8 +460,9 @@ const onSelectPressed = async (trip: any) => {
   try {
     const result = await createTrip(body);
     clearFields();
-  } catch (error) {
-    errorMessage.value = 'Error processing trip.';
+  } catch (error : any) {
+    console.log(error);
+    errorMessage.value = error.response.data.error? error.response.data.error : 'Error processing trip.';
     scrollToTop();
   } finally {
     isTransactionInProgress.value = false;

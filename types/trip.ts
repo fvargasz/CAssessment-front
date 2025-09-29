@@ -1,5 +1,6 @@
 import type { Airport } from "./airport"
 import type { Flight } from "./flight"
+import type { TripSegment } from "./tripSegment"
 
 export interface Trip {
   id: number
@@ -11,7 +12,7 @@ export interface Trip {
   destination_airport: Airport
   earliest_departure: string 
   latest_arrival: string
-  segments: Flight[]
+  segments: TripSegment[]
   segments_count: number
   total_price: string
   is_upcoming: boolean
